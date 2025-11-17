@@ -1,13 +1,23 @@
 (ns p
   (:require [portal.api :as portal]))
 
+(defonce shutdown
+  (delay
+    (println "adding portal shutdown")
+    (.addShutdownHook
+    (Runtime/getRuntime)
+    (Thread. #(portal.api/close)))))
+
 (defonce inspector (atom nil))
 
 (defn open
   [& [opts]]
+  (deref shutdown)
   (if-let [p (:portal (deref inspector))]
-    (portal/open p)
+    (do (println "re-opening portal...")
+        (portal/open p))
     (let [p (portal/open opts)]
+      (println "opening portal...")
       (add-tap #'portal/submit)
       (reset! inspector {:portal p :opts opts}))))
 
@@ -29,13 +39,6 @@
 (defn c
   []
   (some-> inspector deref :portal (portal/clear)))
-
-(defonce shutdown
-  (do
-    (println "adding portal shutdown")
-    (.addShutdownHook
-    (Runtime/getRuntime)
-    (Thread. #(portal.api/close)))))
 
 (comment
   (open)
