@@ -6,7 +6,9 @@
     (println "adding portal shutdown")
     (.addShutdownHook
     (Runtime/getRuntime)
-    (Thread. #(portal.api/close)))))
+    (Thread. #(do
+                (println "closing portal...")
+                (portal.api/close))))))
 
 (defonce inspector (atom nil))
 
