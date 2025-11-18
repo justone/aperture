@@ -1,4 +1,4 @@
-(ns p
+(ns aperture.core
   (:require [portal.api :as portal]))
 
 (defonce shutdown
@@ -30,24 +30,49 @@
     (portal/close p)
     (reset! inspector nil)))
 
-(defn v
-  []
-  (some-> inspector deref :portal deref))
-
-(defn s
-  []
-  (some-> inspector deref))
-
-(defn c
-  []
-  (some-> inspector deref :portal (portal/clear)))
-
 (comment
   (open)
-  (s)
-  (v)
-  (c)
   (close)
   (deref inspector)
   (tap> {:foo [(range 5)]})
+  )
+
+;; Convenience namespace with short aliases for easy calling from REPL
+
+#_{:clj-kondo/ignore [:namespace-name-mismatch]}
+(ns p
+  (:require [aperture.core :as ap]
+            [portal.api :as portal]))
+
+(defn o
+  "Portal open."
+  [& args]
+  (apply ap/open args))
+
+(defn c
+  "Portal close."
+  []
+  (some-> ap/inspector deref :portal (portal/clear)))
+
+(defn v
+  "Portal selected value."
+  []
+  (some-> ap/inspector deref :portal deref))
+
+(defn s
+  "Portal status."
+  []
+  (some-> ap/inspector deref))
+
+(defn x
+  "Close portal."
+  []
+  (ap/close))
+
+(comment
+  (o)
+  (x)
+  (s)
+  (v)
+  (c)
   )
